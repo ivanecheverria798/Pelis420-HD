@@ -1,0 +1,74 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Android platform project if absent
+        working-directory: mobile
+        run: |
+          if [ ! -d android ]; then flutter create --platforms=android --project-name=pelis420_hd .; fi
+      - working-directory: mobile
+        run: flutter pub get
+      - working-directory: mobile
+        run: flutter build apk --release
+      - working-directory: mobile
+        run: flutter build appbundle --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: |
+            mobile/build/app/outputs/flutter-apk/app-release.apk
+            mobile/build/app/outputs/bundle/release/app-release.aab
+
+  ios-unsigned:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS platform project if absent
+        working-directory: mobile
+        run: |
+          if [ ! -d ios ]; then flutter create --platforms=ios --project-name=pelis420_hd .; fi
+      - working-directory: mobile
+        run: flutter pub get
+      - working-directory: mobile
+        run: flutter build ipa --release --no-codesign
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: mobile/build/ios/ipa/*.ipa
+
+  publish:
+    needs: [android, ios-unsigned]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*'
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release-assets/**/*.apk
+            release-assets/**/*.aab
+            release-assets/**/*.ipa
