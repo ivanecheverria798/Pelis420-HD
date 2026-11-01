@@ -1,14 +1,10 @@
 name: Build and publish release
-
 on:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*']
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   android:
     runs-on: ubuntu-latest
@@ -18,23 +14,26 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Generate Android platform project if absent
+      - name: Generate Android project and internet permission
         working-directory: mobile
         run: |
           if [ ! -d android ]; then flutter create --platforms=android --project-name=pelis420_hd .; fi
+          if ! grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml; then
+            sed -i '/<application/i\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          fi
       - working-directory: mobile
         run: flutter pub get
       - working-directory: mobile
-        run: flutter build apk --release
+        run: flutter analyze
       - working-directory: mobile
-        run: flutter build appbundle --release
+        run: flutter test
+      - working-directory: mobile
+        run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
           name: android-release
-          path: |
-            mobile/build/app/outputs/flutter-apk/app-release.apk
-            mobile/build/app/outputs/bundle/release/app-release.aab
-
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
   ios-unsigned:
     runs-on: macos-latest
     steps:
@@ -43,19 +42,29 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Generate iOS platform project if absent
+      - name: Generate iOS project
         working-directory: mobile
         run: |
           if [ ! -d ios ]; then flutter create --platforms=ios --project-name=pelis420_hd .; fi
       - working-directory: mobile
         run: flutter pub get
       - working-directory: mobile
-        run: flutter build ipa --release --no-codesign
+        run: flutter analyze
+      - working-directory: mobile
+        run: flutter test
+      - working-directory: mobile
+        run: flutter build ios --release --no-codesign
+      - name: Package unsigned IPA
+        working-directory: mobile
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          /usr/bin/zip -r Pelis420-HD-unsigned.ipa Payload
       - uses: actions/upload-artifact@v4
         with:
           name: ios-unsigned-ipa
-          path: mobile/build/ios/ipa/*.ipa
-
+          path: mobile/Pelis420-HD-unsigned.ipa
+          if-no-files-found: error
   publish:
     needs: [android, ios-unsigned]
     runs-on: ubuntu-latest
@@ -70,5 +79,4 @@ jobs:
           generate_release_notes: true
           files: |
             release-assets/**/*.apk
-            release-assets/**/*.aab
             release-assets/**/*.ipa
