@@ -21,6 +21,7 @@ jobs:
       - name: Generate iOS project
         run: |
           if [ ! -d ios ]; then flutter create --platforms=ios --project-name=pelis420_hd .; fi
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'Pelis420 HD'" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'Pelis420 HD'" ios/Runner/Info.plist
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
