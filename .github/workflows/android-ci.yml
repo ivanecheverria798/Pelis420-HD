@@ -1,14 +1,11 @@
 name: Android CI
-
 on:
   push:
     branches: [main, master]
   pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,9 +18,12 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Generate Android platform project if absent
+      - name: Generate Android project and internet permission
         run: |
           if [ ! -d android ]; then flutter create --platforms=android --project-name=pelis420_hd .; fi
+          if ! grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml; then
+            sed -i '/<application/i\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          fi
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
@@ -31,7 +31,9 @@ jobs:
       - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
         with:
-          name: android-builds
+          name: Pelis420-HD-Android
           path: |
             mobile/build/app/outputs/flutter-apk/app-release.apk
             mobile/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
