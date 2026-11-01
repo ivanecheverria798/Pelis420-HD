@@ -1,32 +1,23 @@
 # Pelis420 HD
 
-Aplicación Flutter de inicio para Android e iOS.
+App Flutter de demostración para Android/iOS: catálogo ficticio, búsqueda, favoritos locales, fichas, reproductor de vídeo y progreso guardado en el dispositivo.
 
-## Incluye
-- Interfaz inicial en Flutter/Dart con marca **Pelis420 HD**.
-- Integración continua para analizar, probar y compilar Android.
-- Validación de compilación iOS en macOS.
-- Workflow de GitHub Releases activado al publicar una etiqueta `v*`.
-- Artefactos Android APK/AAB e IPA iOS sin firma.
-
-## Ejecutar localmente
+## Ejecutar
 ```bash
 cd mobile
 flutter pub get
+flutter create --platforms=android,ios --project-name=pelis420_hd .
 flutter run
 ```
 
-## Compilaciones en GitHub
-En la pestaña **Actions** se ejecutan los workflows al subir cambios. Para generar una Release:
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
+## Contenido
+Big Buck Bunny es el único vídeo reproducible de la demo (muestra pública de Blender Foundation, CC BY 3.0). Las otras fichas son datos ficticios y no tienen vídeo. Favoritos y progreso se guardan localmente con SharedPreferences.
 
-La Release adjunta APK y AAB de Android y un IPA de iOS sin firma.
+No incluye backend, usuarios, sincronización multidispositivo, catálogo comercial, descargas offline, DRM ni licencias de películas/series. Para un servicio real, añade fuentes de vídeo propias o autorizadas.
 
-## iOS: firma y distribución
-El IPA generado sin firma no se puede instalar directamente en un iPhone normal. Para TestFlight, App Store o distribución Ad Hoc hacen falta una cuenta Apple Developer, certificado de distribución y perfil de aprovisionamiento. No subas certificados, perfiles ni contraseñas al repositorio.
+## Descargas
+GitHub Actions compila el APK de Android y empaqueta un IPA iOS **sin firma** tras cada push a main. Descarga ambos en la pestaña Actions > ejecución > Artifacts. El IPA debe firmarse con Apple Developer para instalarlo en un iPhone convencional o publicarlo en TestFlight/App Store.
 
-## Nota legal
-Este repositorio es una base de software, no un catálogo de streaming con licencias. Solo conecta fuentes de vídeo y distribuye películas, series o anime para los que tengas derechos de emisión. Los proveedores de metadatos no conceden derechos de reproducción.
+Crea una Release con `git tag v0.2.0 && git push origin v0.2.0`.
+
+La aplicación de ejemplo está bajo MIT. Big Buck Bunny: https://peach.blender.org/ · CC BY 3.0: https://creativecommons.org/licenses/by/3.0/.
