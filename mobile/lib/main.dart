@@ -86,7 +86,7 @@ class _MainScreenState extends State<MainScreen> {
       actions:[IconButton(onPressed:()=>setState(()=>tab=1),icon:const Icon(Icons.search))]),
     body:!loaded?const Center(child:CircularProgressIndicator()):
       tab==0?_home():_listing(),
-    bottomNavigationBar:NavigationBar(selectedIndex:tab,onDestinationSelected:(v)=>setState(()=>{tab=v,query=''}),
+    bottomNavigationBar:NavigationBar(selectedIndex:tab,onDestinationSelected:(v)=>setState(() { tab=v; query=''; }),
       destinations:const [
         NavigationDestination(icon:Icon(Icons.home_outlined),label:'Inicio'),
         NavigationDestination(icon:Icon(Icons.search),label:'Buscar'),
@@ -186,12 +186,12 @@ class VideoPage extends StatefulWidget {
   State<VideoPage> createState()=>_VideoPageState();
 }
 class _VideoPageState extends State<VideoPage> {
-  late final VideoPlayerController controller; bool ready=false; String? error;
+  late final VideoPlayerController controller; bool ready=false; String? error; int lastSaved=-1;
   @override
   void initState(){super.initState();controller=VideoPlayerController.networkUrl(Uri.parse(widget.item.url!));
     controller.addListener(_tick);controller.initialize().then((_){if(!mounted)return;setState(()=>ready=true);controller.play();})
       .catchError((Object e){if(mounted)setState(()=>error='No se pudo cargar el vídeo. Comprueba la conexión.');});}
-  void _tick(){if(controller.value.isInitialized)widget.onProgress(controller.value.position.inSeconds);}
+  void _tick(){if(controller.value.isInitialized){final s=controller.value.position.inSeconds;if(s!=lastSaved){lastSaved=s;widget.onProgress(s);}}}
   @override
   void dispose(){controller.removeListener(_tick);controller.dispose();super.dispose();}
   @override
