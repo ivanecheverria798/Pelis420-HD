@@ -140,7 +140,7 @@ class Poster extends StatelessWidget {
   @override
   Widget build(BuildContext context)=>InkWell(onTap:onTap,borderRadius:BorderRadius.circular(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
     Expanded(child:Container(width:double.infinity,decoration:BoxDecoration(borderRadius:BorderRadius.circular(14),
-      gradient:LinearGradient(colors:[item.color,item.color.withOpacity(.35)],begin:Alignment.topLeft,end:Alignment.bottomRight)),
+      gradient:LinearGradient(colors:[item.color,item.color.withValues(alpha:.35)],begin:Alignment.topLeft,end:Alignment.bottomRight)),
       child:Stack(children:[
         const Center(child:Icon(Icons.movie_creation_outlined,size:48,color:Colors.white70)),
         Positioned(left:8,top:8,child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),
