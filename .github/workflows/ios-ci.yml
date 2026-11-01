@@ -1,14 +1,11 @@
 name: iOS CI
-
 on:
   push:
     branches: [main, master]
   pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: macos-latest
@@ -21,14 +18,21 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Generate iOS platform project if absent
+      - name: Generate iOS project
         run: |
           if [ ! -d ios ]; then flutter create --platforms=ios --project-name=pelis420_hd .; fi
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
       - run: flutter build ios --release --no-codesign
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          /usr/bin/zip -r ../Pelis420-HD-unsigned.ipa Payload
       - uses: actions/upload-artifact@v4
         with:
-          name: ios-runner-unsigned
-          path: mobile/build/ios/iphoneos/Runner.app
+          name: Pelis420-HD-iOS-unsigned
+          path: mobile/Pelis420-HD-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
