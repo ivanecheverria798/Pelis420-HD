@@ -21,6 +21,7 @@ jobs:
           if ! grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml; then
             sed -i '/<application/i\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
           fi
+          sed -i 's/android:label="[^"]*"/android:label="Pelis420 HD"/' android/app/src/main/AndroidManifest.xml
       - working-directory: mobile
         run: flutter pub get
       - working-directory: mobile
@@ -46,6 +47,7 @@ jobs:
         working-directory: mobile
         run: |
           if [ ! -d ios ]; then flutter create --platforms=ios --project-name=pelis420_hd .; fi
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'Pelis420 HD'" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'Pelis420 HD'" ios/Runner/Info.plist
       - working-directory: mobile
         run: flutter pub get
       - working-directory: mobile
